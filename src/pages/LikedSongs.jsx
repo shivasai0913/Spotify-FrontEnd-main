@@ -35,7 +35,7 @@ export default function LikedSongs({ likedSongs, currentSong, onPlay, onUnlike }
       {likedSongs.length === 0 ? (
         <div className="liked-empty">
           <div className="liked-empty-icon">♥</div>
-          <h3>Songs you like will appear here</h3>
+          <h3>Song you like will appear here</h3>
           <p>Click the ♥ icon on any song while it's playing to save it here!</p>
         </div>
       ) : (
