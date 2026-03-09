@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://spotify-backend-main.onrender.com/api/songs";
+const BASE_URL = "https://spotify-backend-main.onrender.com/api/";
 //const BASE_URL = "http://localhost:8081/api";
 
 
