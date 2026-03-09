@@ -14,14 +14,30 @@ export default function SongCard({ song, onPlay, isPlaying, likedSongs, onToggle
         src={imgSrc}
         alt={song.title}
         className="card-img"
-        onError={(e) => { e.target.src = "https://via.placeholder.com/160x160/282828/fff?text=♪"; }}
+        onError={(e) => {
+          e.target.src = "https://via.placeholder.com/160x160/282828/fff?text=♪";
+        }}
       />
 
       <button
         className={`card-play-btn ${isPlaying ? "playing" : ""}`}
-        onClick={(e) => { e.stopPropagation(); onPlay(song); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onPlay(song);
+        }}
       >
         {isPlaying ? "⏸" : "▶"}
+      </button>
+
+      {/* LIKE BUTTON */}
+      <button
+        className="card-like-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleLike(song);
+        }}
+      >
+        {isLiked ? "❤️" : "❤️"}
       </button>
 
       <p className="card-title">{song.title}</p>
