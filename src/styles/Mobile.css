@@ -1,0 +1,326 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE.CSS  —  Import this AFTER App.css
+   Matches real Spotify mobile layout (≤ 700px)
+══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 700px) {
+
+  /* ── Reset body scroll ── */
+  body { overflow: hidden; }
+
+  /* ── Root layout ── */
+  .main {
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+    height: 100dvh;
+    padding-bottom: 120px; /* mini-player + bottom nav */
+    overflow: hidden;
+  }
+
+  /* ── Hide desktop sidebar ── */
+  .sidebar { display: none !important; }
+  .now-playing-panel { display: none !important; }
+
+  /* ── Main content: full screen scroll ── */
+  .maincontent {
+    border-radius: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     MOBILE TOP NAV BAR  (replaces sticky-nav)
+  ══════════════════════════════════════════════════════ */
+  .sticky-nav {
+    padding: 0.75rem 1rem 0.5rem;
+    background: #000;
+    border-bottom: none;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  /* Avatar + filter chips row */
+  .sticky-nav-icons { display: none; }
+  .sticky-nav-options {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sticky-nav-options::-webkit-scrollbar { display: none; }
+
+  /* Mobile avatar pill */
+  .user-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: #e91e8c;
+    font-size: 1rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* Filter chips: All / Music / Podcasts */
+  .mobile-chip {
+    background: #2a2a2a;
+    border: none;
+    border-radius: 100px;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .mobile-chip.active { background: #1DB954; color: #000; }
+  .mobile-chip:hover  { background: #3a3a3a; }
+
+  /* Hide desktop-only buttons in nav */
+  .sticky-nav-options .badge,
+  .sticky-nav-options button:not(.mobile-chip):not(.user-avatar) { display: none; }
+
+  /* ══════════════════════════════════════════════════════
+     QUICK-ACCESS GRID  (2-col pill cards at top)
+     Like "Hot Hits Telugu", "Liked Songs" grid
+  ══════════════════════════════════════════════════════ */
+  .recent-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem 0.85rem 0 !important;
+  }
+
+  .recent-card {
+    width: 100% !important;
+    height: 56px;
+    border-radius: 6px;
+    background: #2a2a2a;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .recent-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px 0 0 6px;
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+
+  .recent-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0 0.6rem;
+    white-space: normal;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: unset;
+  }
+
+  .recent-info { display: none; }
+
+  /* ══════════════════════════════════════════════════════
+     SECTION TITLES
+  ══════════════════════════════════════════════════════ */
+  .section-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 1.4rem 0.85rem 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     HORIZONTAL SCROLL CARD ROW  (Jump back in / Featured)
+  ══════════════════════════════════════════════════════ */
+  .cards-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    gap: 0.85rem;
+    padding: 0 0.85rem 0.85rem !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .cards-container::-webkit-scrollbar { display: none; }
+
+  .card {
+    width: 155px !important;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    border-radius: 8px;
+  }
+
+  .card-img { border-radius: 6px; }
+
+  .card-title { font-size: 0.82rem; margin: 0.5rem 0 0.15rem; }
+  .card-info  { font-size: 0.72rem; }
+
+  /* Always show play button on mobile (no hover) */
+  .card-play-btn {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    width: 38px; height: 38px;
+    font-size: 0.85rem;
+    bottom: 60px;
+    right: 8px;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     SEARCH PAGE
+  ══════════════════════════════════════════════════════ */
+  .search-page { padding: 0.85rem; }
+  .search-box {
+    max-width: 100%;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .category-grid { gap: 0.5rem; }
+  .category-chip {
+    min-width: calc(50% - 0.25rem);
+    padding: 0.85rem 0.5rem;
+    font-size: 0.82rem;
+    flex: 1 1 calc(50% - 0.25rem);
+  }
+
+  /* ══════════════════════════════════════════════════════
+     UPLOAD PAGE
+  ══════════════════════════════════════════════════════ */
+  .upload-page {
+    max-width: 100%;
+    padding: 0.85rem;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     LIKED SONGS PAGE
+  ══════════════════════════════════════════════════════ */
+  .liked-hero {
+    padding: 1.5rem 1rem 1rem;
+    gap: 1rem;
+  }
+  .liked-hero-art { width: 90px; height: 90px; font-size: 2.2rem; }
+  .liked-hero-title { font-size: 1.8rem; }
+  .liked-controls { padding: 1rem; }
+
+  .songs-table { padding: 0 0.5rem 2rem; }
+  .songs-table-header,
+  .song-row { grid-template-columns: 36px 1fr 44px; }
+  .song-row-album { display: none; }
+  .song-row { padding: 0.5rem 0.5rem; }
+
+  /* Always show unlike btn on mobile */
+  .song-row-unlike { opacity: 1 !important; }
+
+  /* ══════════════════════════════════════════════════════
+     MINI PLAYER BAR  (above bottom nav)
+  ══════════════════════════════════════════════════════ */
+  .musicplayer {
+    bottom: 56px; /* sits above bottom nav */
+    height: 64px;
+    padding: 0 0.75rem;
+    background: #1a1a1a;
+    border-top: none;
+    border-radius: 10px;
+    margin: 0 0.5rem;
+    width: calc(100% - 1rem);
+    left: 0; right: 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+  }
+
+  /* Hide progress bar & extra controls */
+  .play-bar { display: none; }
+  .controls { display: none; }
+
+  /* Shuffle/repeat hidden, only prev/play/next */
+  .player-controls .ctrl-btn:first-child,
+  .player-controls .ctrl-btn:last-child { display: none; }
+
+  .album  { width: auto; flex: 1; min-width: 0; gap: 0.6rem; }
+  .player { width: auto; flex-shrink: 0; flex-direction: row; gap: 0; }
+
+  .album-thumb { width: 48px; height: 48px; border-radius: 6px; }
+  .album-title  { font-size: 0.82rem; }
+  .album-artist { font-size: 0.72rem; }
+
+  .play-pause-btn {
+    width: 38px; height: 38px;
+    font-size: 1rem;
+    background: #fff;
+  }
+
+  /* Extra icons in mini player (device/checkmark style) */
+  .mini-player-actions {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+  }
+  .mini-player-actions svg { font-size: 1.3rem; color: rgba(255,255,255,0.7); }
+
+  /* ══════════════════════════════════════════════════════
+     BOTTOM NAVIGATION BAR
+  ══════════════════════════════════════════════════════ */
+  .bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 56px;
+    background: #121212;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 200;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 0.25rem;
+  }
+
+  .bottom-nav-item {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.18rem;
+    opacity: 0.55;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s;
+    flex: 1;
+    max-width: 80px;
+  }
+  .bottom-nav-item svg { font-size: 1.45rem; }
+  .bottom-nav-item span { white-space: nowrap; }
+
+  .bottom-nav-item.active { opacity: 1; }
+  .bottom-nav-item.active svg  { color: #fff; }
+  .bottom-nav-item.active span { color: #fff; }
+  .bottom-nav-item:hover { opacity: 0.85; }
+
+}
+
+/* Hide bottom nav & mini-player extras on non-mobile */
+@media (min-width: 701px) {
+  .bottom-nav        { display: none !important; }
+  .mini-player-actions { display: none !important; }
+  .mobile-chip       { display: none !important; }
+}

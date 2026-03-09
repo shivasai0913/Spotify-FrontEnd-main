@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
 
-import Sidebar      from "./components/Sidebar";
-import Player       from "./components/Player";
-import NowPlaying   from "./components/NowPlaying";
-import Home         from "./pages/Home";
-import Search       from "./pages/Search";
-import UploadSong   from "./pages/UploadSong";
-import LikedSongs   from "./pages/LikedSongs";
-import PlaylistPage from "./pages/PlaylistPage";
+import Sidebar           from "./components/Sidebar";
+import Player            from "./components/Player";
+import NowPlaying        from "./components/NowPlaying";
+import BottomNav         from "./components/BottomNav";         // ← NEW
+import MobileFilterChips from "./components/MobileFilterChips"; // ← NEW
+import Home              from "./pages/Home";
+import Search            from "./pages/Search";
+import UploadSong        from "./pages/UploadSong";
+import LikedSongs        from "./pages/LikedSongs";
+import PlaylistPage      from "./pages/PlaylistPage";
 
 import {
   getAllSongs, getAllPlaylists,
   createPlaylist, deletePlaylist, renamePlaylist, addSongToPlaylist
 } from "./services/api";
 import "./styles/App.css";
+import "./styles/Mobile.css"; // ← NEW
 
 export default function App() {
   const [page, setPage]               = useState("home");
@@ -126,7 +129,8 @@ export default function App() {
 
   return (
     <div className="main">
-      {/* Sidebar */}
+
+      {/* Desktop Sidebar — hidden on mobile via CSS */}
       <Sidebar
         activePage={activePage} setActivePage={setActivePage}
         playlists={playlists} likedCount={likedSongs.length}
@@ -137,15 +141,21 @@ export default function App() {
 
       {/* Main content */}
       <div className="maincontent">
+
+        {/* ── Top nav bar ── */}
         <div className="sticky-nav">
+          {/* Desktop: back/forward arrows */}
           <div className="sticky-nav-icons">
             <button className="nav-arrow" onClick={goBack}>‹</button>
             <button className="nav-arrow" onClick={goForward}>›</button>
           </div>
+
           <div className="sticky-nav-options">
+            {/* Desktop-only buttons */}
             <button className="badge hide">Explore Premium</button>
-            <button className="badge dark-badge">⬇ Install App</button>
-            {/* Now Playing toggle button */}
+            <button className="badge dark-badge hide">⬇ Install App</button>
+
+            {/* Now Playing toggle (desktop) */}
             {currentSong && (
               <button
                 className={`now-playing-toggle ${showNowPlaying ? "active" : ""}`}
@@ -155,13 +165,21 @@ export default function App() {
                 🎵
               </button>
             )}
+
+            {/* Avatar — shown on both desktop & mobile */}
             <div className="user-avatar">N</div>
+
+            {/* ↓ Mobile-only filter chips (All / Music / Podcasts) */}
+            {/* Hidden on desktop via CSS (.mobile-chip { display:none }) */}
+            <MobileFilterChips />
           </div>
         </div>
+
+        {/* Page content */}
         {renderPage()}
       </div>
 
-      {/* Now Playing panel */}
+      {/* Now Playing panel — desktop only, hidden on mobile via CSS */}
       {currentSong && showNowPlaying && (
         <NowPlaying
           song={currentSong}
@@ -172,7 +190,7 @@ export default function App() {
         />
       )}
 
-      {/* Player */}
+      {/* Player bar */}
       <Player
         song={currentSong}
         songs={songs}
@@ -181,6 +199,13 @@ export default function App() {
         onToggleLike={handleToggleLike}
         onPlayingChange={setIsPlaying}
       />
+
+      {/* ↓ Mobile bottom nav — hidden on desktop via CSS */}
+      <BottomNav
+        activePage={activePage}
+        onNavigate={setActivePage}
+      />
+
     </div>
   );
 }
