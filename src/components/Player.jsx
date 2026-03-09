@@ -32,6 +32,7 @@ export default function Player({ song, songs, onSongChange, likedSongs, onToggle
       setPlay(true);
       setCurrentTime(0);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song]);
 
   const handlePlayPause = () => {
