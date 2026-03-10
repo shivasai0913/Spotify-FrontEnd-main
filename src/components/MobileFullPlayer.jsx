@@ -35,7 +35,6 @@ export default function MobileFullPlayer({
 }) {
   const [visible, setVisible] = useState(false);
   const startY   = useRef(null);
-  const dragY    = useRef(0);
   const [dragOffset, setDragOffset] = useState(0);
 
   const isLiked = likedSongs.some((s) => s.id === song?.id);
