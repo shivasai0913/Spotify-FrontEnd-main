@@ -3,6 +3,7 @@ import {
   FaShuffle, FaBackwardStep, FaForwardStep,
   FaRepeat, FaVolumeHigh, FaVolumeXmark, FaHeart, FaRegHeart
 } from "react-icons/fa6";
+import MobileFullPlayer from "./MobileFullPlayer";
 import "../styles/App.css";
 
 function formatTime(seconds) {
@@ -20,6 +21,7 @@ export default function Player({ song, songs, onSongChange, likedSongs, onToggle
   const [volume, setVolume]           = useState(80);
   const [shuffle, setShuffle]         = useState(false);
   const [repeat, setRepeat]           = useState(false);
+  const [showFullPlayer, setShowFullPlayer] = useState(false);
 
   const isLiked = likedSongs?.some((s) => s.id === song?.id);
 
@@ -58,71 +60,110 @@ export default function Player({ song, songs, onSongChange, likedSongs, onToggle
     onSongChange(prev);
   };
 
+  const handleSeek = (val) => {
+    if (audioRef.current) audioRef.current.currentTime = val;
+    setCurrentTime(val);
+  };
+
   const imgSrc = song?.imageUrl?.startsWith("http")
     ? song.imageUrl
     : "https://via.placeholder.com/56x56/282828/fff?text=♪";
 
+  const isMobile = () => window.innerWidth <= 700;
+
   return (
-    <div className="musicplayer">
-      <div className="album">
-        {song ? (
-          <>
-            <div className="album-thumb">
-              <img src={imgSrc} alt={song.title}
-                onError={(e) => { e.target.src = "https://via.placeholder.com/56x56/282828/fff?text=♪"; }} />
+    <>
+      <div className="musicplayer">
+
+        {/* Album section — tap on mobile to open full player */}
+        <div
+          className="album"
+          onClick={() => { if (song && isMobile()) setShowFullPlayer(true); }}
+          style={{ cursor: song ? "pointer" : "default" }}
+        >
+          {song ? (
+            <>
+              <div className="album-thumb">
+                <img src={imgSrc} alt={song.title}
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/56x56/282828/fff?text=♪"; }} />
+              </div>
+              <div className="album-info">
+                <p className="album-title">{song.title}</p>
+                <p className="album-artist">{song.artist}</p>
+              </div>
+              <button
+                className={`like-btn ${isLiked ? "liked" : ""}`}
+                onClick={(e) => { e.stopPropagation(); onToggleLike?.(song); }}
+                title={isLiked ? "Remove from Liked Songs" : "Save to Liked Songs"}
+              >
+                {isLiked ? <FaHeart /> : <FaRegHeart />}
+              </button>
+            </>
+          ) : (
+            <p style={{ opacity: 0.3, fontSize: "0.85rem" }}>No song selected</p>
+          )}
+        </div>
+
+        {/* Desktop player controls */}
+        <div className="player">
+          <div className="player-controls">
+            <button className={`ctrl-btn ${shuffle ? "active" : ""}`} onClick={() => setShuffle(!shuffle)}><FaShuffle /></button>
+            <button className="ctrl-btn" onClick={handlePrev}><FaBackwardStep /></button>
+            <button className="play-pause-btn" onClick={handlePlayPause}>{playing ? "⏸" : "▶"}</button>
+            <button className="ctrl-btn" onClick={handleNext}><FaForwardStep /></button>
+            <button className={`ctrl-btn ${repeat ? "active" : ""}`} onClick={() => setRepeat(!repeat)}><FaRepeat /></button>
+          </div>
+          <div className="play-bar">
+            <span className="curr-time">{formatTime(currentTime)}</span>
+            <div className="progress-wrap">
+              <input type="range" min={0} max={duration || 100} value={currentTime} step={0.1}
+                onChange={(e) => handleSeek(Number(e.target.value))}
+                className="progress-bar" />
             </div>
-            <div className="album-info">
-              <p className="album-title">{song.title}</p>
-              <p className="album-artist">{song.artist}</p>
-            </div>
-            <button
-              className={`like-btn ${isLiked ? "liked" : ""}`}
-              onClick={() => onToggleLike?.(song)}
-              title={isLiked ? "Remove from Liked Songs" : "Save to Liked Songs"}
-            >
-              {isLiked ? <FaHeart /> : <FaRegHeart />}
-            </button>
-          </>
-        ) : (
-          <p style={{ opacity: 0.3, fontSize: "0.85rem" }}>No song selected</p>
+            <span className="tot-time">{formatTime(duration)}</span>
+          </div>
+        </div>
+
+        {/* Volume */}
+        <div className="controls">
+          <button className="ctrl-btn" style={{ fontSize: "1rem" }}
+            onClick={() => { const v = volume === 0 ? 80 : 0; setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; }}>
+            {volume === 0 ? <FaVolumeXmark /> : <FaVolumeHigh />}
+          </button>
+          <input type="range" min={0} max={100} value={volume} className="volume-bar"
+            onChange={(e) => { const v = Number(e.target.value); setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; }} />
+        </div>
+
+        {song && (
+          <audio ref={audioRef} src={song.audioUrl}
+            onTimeUpdate={() => { if (audioRef.current) setCurrentTime(audioRef.current.currentTime); }}
+            onLoadedMetadata={() => { if (audioRef.current) setDuration(audioRef.current.duration); }}
+            onEnded={handleNext}
+            loop={repeat}
+          />
         )}
       </div>
 
-      <div className="player">
-        <div className="player-controls">
-          <button className={`ctrl-btn ${shuffle ? "active" : ""}`} onClick={() => setShuffle(!shuffle)}><FaShuffle /></button>
-          <button className="ctrl-btn" onClick={handlePrev}><FaBackwardStep /></button>
-          <button className="play-pause-btn" onClick={handlePlayPause}>{playing ? "⏸" : "▶"}</button>
-          <button className="ctrl-btn" onClick={handleNext}><FaForwardStep /></button>
-          <button className={`ctrl-btn ${repeat ? "active" : ""}`} onClick={() => setRepeat(!repeat)}><FaRepeat /></button>
-        </div>
-        <div className="play-bar">
-          <span className="curr-time">{formatTime(currentTime)}</span>
-          <div className="progress-wrap">
-            <input type="range" min={0} max={duration || 100} value={currentTime} step={0.1}
-              onChange={(e) => { const v = Number(e.target.value); if (audioRef.current) audioRef.current.currentTime = v; setCurrentTime(v); }}
-              className="progress-bar" />
-          </div>
-          <span className="tot-time">{formatTime(duration)}</span>
-        </div>
-      </div>
-
-      <div className="controls">
-        <button className="ctrl-btn" style={{ fontSize: "1rem" }} onClick={() => { const v = volume === 0 ? 80 : 0; setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; }}>
-          {volume === 0 ? <FaVolumeXmark /> : <FaVolumeHigh />}
-        </button>
-        <input type="range" min={0} max={100} value={volume} className="volume-bar"
-          onChange={(e) => { const v = Number(e.target.value); setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; }} />
-      </div>
-
-      {song && (
-        <audio ref={audioRef} src={song.audioUrl}
-          onTimeUpdate={() => { if (audioRef.current) setCurrentTime(audioRef.current.currentTime); }}
-          onLoadedMetadata={() => { if (audioRef.current) setDuration(audioRef.current.duration); }}
-          onEnded={handleNext}
-          loop={repeat}
+      {/* Mobile full screen player — slides up on tap */}
+      {showFullPlayer && song && (
+        <MobileFullPlayer
+          song={song}
+          isPlaying={playing}
+          likedSongs={likedSongs}
+          onToggleLike={onToggleLike}
+          onClose={() => setShowFullPlayer(false)}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          onPlayPause={handlePlayPause}
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={handleSeek}
+          shuffle={shuffle}
+          onShuffle={() => setShuffle(!shuffle)}
+          repeat={repeat}
+          onRepeat={() => setRepeat(!repeat)}
         />
       )}
-    </div>
+    </>
   );
 }
