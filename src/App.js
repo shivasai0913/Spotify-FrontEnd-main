@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import "./styles/LightMode.css";
 import ThemeToggle       from "./components/ThemeToggle";
 import UserManagement    from "./pages/UserManagement";
 import Analytics         from "./pages/Analytics";

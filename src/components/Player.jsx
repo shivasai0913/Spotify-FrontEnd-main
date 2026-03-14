@@ -38,16 +38,22 @@ export default function Player({ song, songs, onSongChange, likedSongs, onToggle
 
   const setPlay = (val) => { setPlaying(val); onPlayingChange?.(val); };
 
-  useEffect(() => {
-    if (song && audioRef.current) {
-      audioRef.current.load();
-      audioRef.current.play().catch(() => {});
-      setPlay(true);
-      setCurrentTime(0);
-      countedRef.current = null; // reset counter for new song
+useEffect(() => {
+  if (song && audioRef.current) {
+    audioRef.current.load();
+    // Resume any suspended audio context first
+    if (window.AudioContext || window.webkitAudioContext) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") ctx.resume();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [song]);
+    audioRef.current.play().catch((err) => {
+      console.warn("Autoplay blocked:", err);
+    });
+    setPlay(true);
+    setCurrentTime(0);
+  }
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [song]);
 
   const handlePlayPause = () => {
     if (!audioRef.current) return;

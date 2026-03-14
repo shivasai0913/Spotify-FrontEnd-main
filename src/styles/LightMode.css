@@ -1,0 +1,107 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+   Add this at the very bottom of your App.css
+══════════════════════════════════════════════════════════════════════════ */
+
+body.light,
+body[data-theme="light"] {
+  background: #f0f0f0;
+  color: #000;
+}
+
+/* Apply light theme when html has light class (set by ThemeContext) */
+html[data-theme="light"] body,
+html[data-theme="light"] .main {
+  background: #f0f0f0;
+  color: #000;
+}
+
+/* ── Layout ── */
+[data-theme="light"] .main          { background: #f0f0f0; }
+[data-theme="light"] .sidebar       { background: transparent; }
+[data-theme="light"] .nav           { background: #e0e0e0; }
+[data-theme="light"] .library       { background: #e0e0e0; }
+[data-theme="light"] .maincontent   { background: #e8e8e8; }
+[data-theme="light"] .musicplayer   { background: #e0e0e0; border-top: 1px solid #ccc; }
+
+/* ── Nav options ── */
+[data-theme="light"] .sticky-nav    { background: rgba(232,232,232,0.95); border-bottom: 1px solid #ccc; }
+[data-theme="light"] .nav-arrow     { background: rgba(0,0,0,0.08); color: #000; }
+[data-theme="light"] .nav-arrow:hover { background: rgba(0,0,0,0.15); }
+[data-theme="light"] .navoption     { color: #000; }
+[data-theme="light"] .navoption:hover { background: rgba(0,0,0,0.06); }
+
+/* ── Cards ── */
+[data-theme="light"] .card          { background: #d8d8d8; }
+[data-theme="light"] .card:hover    { background: #ccc; }
+[data-theme="light"] .card-title    { color: #000; }
+[data-theme="light"] .card-info     { color: #444; }
+
+/* ── Recent cards ── */
+[data-theme="light"] .recent-card   { background: #d4d4d4; }
+[data-theme="light"] .recent-card:hover { background: #c8c8c8; }
+[data-theme="light"] .recent-title  { color: #000; }
+
+/* ── Library boxes ── */
+[data-theme="light"] .box           { background: #d4d4d4; }
+[data-theme="light"] .box-p1        { color: #000; }
+[data-theme="light"] .box-p2        { color: #555; }
+
+/* ── Playlist items ── */
+[data-theme="light"] .playlist-item:hover { background: rgba(0,0,0,0.06); }
+[data-theme="light"] .playlist-name { color: #000; }
+[data-theme="light"] .playlist-meta { color: #555; }
+[data-theme="light"] .pl-dropdown   { background: #e0e0e0; border-color: #ccc; }
+[data-theme="light"] .pl-dropdown-item { color: #000; }
+[data-theme="light"] .pl-dropdown-item:hover { background: rgba(0,0,0,0.08); }
+
+/* ── Player controls ── */
+[data-theme="light"] .ctrl-btn      { color: #444; }
+[data-theme="light"] .ctrl-btn:hover { color: #000; }
+[data-theme="light"] .play-pause-btn { background: #000; color: #fff; }
+[data-theme="light"] .album-title   { color: #000; }
+[data-theme="light"] .album-artist  { color: #555; }
+[data-theme="light"] .curr-time,
+[data-theme="light"] .tot-time      { color: #555; }
+[data-theme="light"] .progress-bar  { background: rgba(0,0,0,0.2); }
+[data-theme="light"] .volume-bar    { background: rgba(0,0,0,0.2); }
+
+/* ── Search ── */
+[data-theme="light"] .search-box    { background: #fff; }
+[data-theme="light"] .search-input  { color: #000; }
+[data-theme="light"] .category-chip { background: #d0d0d0; color: #000; }
+[data-theme="light"] .category-chip:hover { background: #c0c0c0; }
+
+/* ── Upload ── */
+[data-theme="light"] .upload-card   { background: #d8d8d8; }
+[data-theme="light"] .form-input    { background: #e8e8e8; color: #000; border: 1px solid #ccc; }
+[data-theme="light"] .form-input:focus { background: #fff; }
+[data-theme="light"] .file-zone     { background: #e0e0e0; border-color: #bbb; }
+
+/* ── Liked Songs ── */
+[data-theme="light"] .song-row:hover { background: rgba(0,0,0,0.05); }
+[data-theme="light"] .song-row-title  { color: #000; }
+[data-theme="light"] .song-row-artist { color: #555; }
+[data-theme="light"] .song-row-album  { color: #555; }
+[data-theme="light"] .songs-table-header { border-bottom-color: rgba(0,0,0,0.1); }
+
+/* ── Now Playing panel ── */
+[data-theme="light"] .now-playing-panel { background: #e0e0e0; }
+[data-theme="light"] .np-title       { color: #000; }
+[data-theme="light"] .np-artist      { color: #555; }
+[data-theme="light"] .np-tab         { color: #555; }
+[data-theme="light"] .np-tab.active  { color: #000; }
+[data-theme="light"] .np-about-label { color: #666; }
+[data-theme="light"] .np-about-value { color: #000; }
+
+/* ── Badges ── */
+[data-theme="light"] .dark-badge    { background: #333; color: #fff; }
+[data-theme="light"] .badge         { background: #000; color: #fff; }
+[data-theme="light"] .badge:hover   { background: #222; }
+
+/* ── Scrollbar ── */
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.35); }
+
+/* ── Section titles ── */
+[data-theme="light"] .section-title { color: #000; }
