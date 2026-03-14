@@ -1,22 +1,28 @@
 import { useState, useEffect } from "react";
-import "./styles/LightMode.css";
-import ThemeToggle       from "./components/ThemeToggle";
-import UserManagement    from "./pages/UserManagement";
-import Analytics         from "./pages/Analytics";
-import Sidebar           from "./components/Sidebar";
-import Player            from "./components/Player";
-import NowPlaying        from "./components/NowPlaying";
-import BottomNav         from "./components/BottomNav";
-import MobileFilterChips from "./components/MobileFilterChips";
-import LoginPage         from "./pages/LoginPage";
+
+import ThemeToggle        from "./components/ThemeToggle";
+import UserManagement     from "./pages/UserManagement";
+import Analytics          from "./pages/Analytics";
+import Sidebar            from "./components/Sidebar";
+import Player             from "./components/Player";
+import NowPlaying         from "./components/NowPlaying";
+import BottomNav          from "./components/BottomNav";
+import MobileFilterChips  from "./components/MobileFilterChips";
+import LoginPage          from "./pages/LoginPage";
 import { ToastContainer, toast } from "./components/Toast";
-import Home              from "./pages/Home";
-import Search            from "./pages/Search";
-import UploadSong        from "./pages/UploadSong";
-import LikedSongs        from "./pages/LikedSongs";
-import PlaylistPage      from "./pages/PlaylistPage";
-import AdminDashboard    from "./pages/AdminDashboard";
+import Home               from "./pages/Home";
+import Search             from "./pages/Search";
+import UploadSong         from "./pages/UploadSong";
+import LikedSongs         from "./pages/LikedSongs";
+import PlaylistPage       from "./pages/PlaylistPage";
+import AdminDashboard     from "./pages/AdminDashboard";
 import { useRecentlyPlayed } from "./hooks/useRecentlyPlayed";
+
+// ── Stunning new components ───────────────────────────────────────────
+import SplashScreen       from "./components/SplashScreen";
+import PageTransition     from "./components/PageTransition";
+import { ConfettiCanvas, triggerConfetti } from "./components/Confetti";
+import AnimatedBackground from "./components/AnimatedBackground";
 
 import {
   getAllSongs, getAllPlaylists,
@@ -26,8 +32,10 @@ import { isLoggedIn, isAdmin, getName, logout } from "./services/auth";
 
 import "./styles/App.css";
 import "./styles/Mobile.css";
+import "./styles/Stunning.css";  // ← glassmorphism + glow
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);  // ← splash screen
   const [authed,   setAuthed]   = useState(isLoggedIn());
   const [admin,    setAdmin]    = useState(isAdmin());
   const [userName, setUserName] = useState(getName() || "");
@@ -63,6 +71,14 @@ export default function App() {
     setCurrentSong(null); setSongs([]); setPlaylists([]);
     setPage("home");
   };
+
+  // ── Show splash screen first ──────────────────────────────────────────
+  if (showSplash) return (
+    <>
+      <ToastContainer />
+      <SplashScreen onComplete={() => setShowSplash(false)} />
+    </>
+  );
 
   if (!authed) return (
     <>
@@ -104,9 +120,11 @@ export default function App() {
     else if (key.startsWith("playlist-")) navigate({ type:"playlist", id: key.replace("playlist-","") });
   };
 
+  // ── Like with confetti burst ──────────────────────────────────────────
   const handleToggleLike = (song) => {
     const already = likedSongs.some(s => s.id === song.id);
     setLikedSongs(prev => already ? prev.filter(s => s.id !== song.id) : [...prev, song]);
+    if (!already) triggerConfetti(); // ← confetti on like!
     toast(already ? "Removed from Liked Songs" : "Added to Liked Songs 💚", already ? "info" : "success");
   };
 
@@ -168,8 +186,8 @@ export default function App() {
   };
 
   const navBtnStyle = (isActive) => ({
-    background:   isActive ? "rgba(29,185,84,0.15)" : "none",
-    border:       "1px solid rgba(255,255,255,0.15)",
+    background:   isActive ? "rgba(29,185,84,0.15)" : "rgba(255,255,255,0.04)",
+    border:       "1px solid rgba(255,255,255,0.12)",
     color:        "#fff",
     borderRadius: "100px",
     padding:      "0.25rem 0.75rem",
@@ -178,28 +196,32 @@ export default function App() {
     fontWeight:   700,
     cursor:       "pointer",
     transition:   "background 0.2s",
+    backdropFilter: "blur(8px)",
   });
 
   return (
-    <div className="main">
+    <div className="main" style={{ position:"relative" }}>
 
+      {/* Animated gradient background */}
+      <AnimatedBackground isPlaying={isPlaying} />
+
+      {/* Confetti canvas */}
+      <ConfettiCanvas />
+
+      {/* Toast notifications */}
       <ToastContainer />
 
       <Sidebar
-        activePage={activePage}
-        setActivePage={setActivePage}
-        playlists={playlists}
-        likedCount={likedSongs.length}
+        activePage={activePage} setActivePage={setActivePage}
+        playlists={playlists} likedCount={likedSongs.length}
         onCreatePlaylist={handleCreatePlaylist}
         onRenamePlaylist={handleRenamePlaylist}
         onDeletePlaylist={handleDeletePlaylist}
         isAdmin={admin}
       />
 
-      <div className="maincontent" style={{ position:"relative" }}>
+      <div className="maincontent" style={{ position:"relative", zIndex:1 }}>
         <div className="sticky-nav">
-
-          {/* Back / Forward arrows */}
           <div className="sticky-nav-icons">
             <button className="nav-arrow" onClick={goBack}>‹</button>
             <button className="nav-arrow" onClick={goForward}>›</button>
@@ -209,89 +231,56 @@ export default function App() {
             <button className="badge hide">Explore Premium</button>
             <button className="badge dark-badge hide">⬇ Install App</button>
 
-            {/* Now Playing toggle */}
             {currentSong && (
-              <button
-                className={`now-playing-toggle ${showNowPlaying ? "active" : ""}`}
-                onClick={() => setShowNowPlaying(!showNowPlaying)}
-                title="Now Playing"
-              >🎵</button>
+              <button className={`now-playing-toggle ${showNowPlaying?"active":""}`}
+                onClick={() => setShowNowPlaying(!showNowPlaying)} title="Now Playing">🎵</button>
             )}
 
-            {/* Admin buttons */}
             {admin && (
               <div style={{ display:"flex", gap:"0.4rem", alignItems:"center", flexWrap:"wrap" }}>
                 <button onClick={() => navigate("admin")}     style={navBtnStyle(page==="admin")}>🎛 Dashboard</button>
                 <button onClick={() => navigate("users")}     style={navBtnStyle(page==="users")}>👥 Users</button>
                 <button onClick={() => navigate("analytics")} style={navBtnStyle(page==="analytics")}>📊 Analytics</button>
-                <span style={{
-                  background:"#1DB954", color:"#000",
-                  fontSize:"0.7rem", fontWeight:800,
-                  padding:"0.2rem 0.6rem", borderRadius:"100px",
-                  letterSpacing:"0.05em",
-                }}>ADMIN</span>
+                <span style={{background:"#1DB954",color:"#000",fontSize:"0.7rem",fontWeight:800,padding:"0.2rem 0.6rem",borderRadius:"100px",letterSpacing:"0.05em"}}>
+                  ADMIN
+                </span>
               </div>
             )}
 
-            {/* Avatar + Theme toggle + Logout */}
             <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
               <div className="user-avatar" title={userName}>
                 {userName?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <ThemeToggle />
-              <button
-                onClick={handleLogout}
-                style={{
-                  background:   "none",
-                  border:       "1px solid rgba(255,255,255,0.2)",
-                  color:        "rgba(255,255,255,0.7)",
-                  borderRadius: "100px",
-                  padding:      "0.25rem 0.75rem",
-                  fontSize:     "0.75rem",
-                  fontFamily:   "Montserrat,sans-serif",
-                  fontWeight:   700,
-                  cursor:       "pointer",
-                }}
-              >
-                Logout
-              </button>
+              <button onClick={handleLogout} style={{
+                background:"rgba(255,255,255,0.05)", backdropFilter:"blur(8px)",
+                border:"1px solid rgba(255,255,255,0.15)", color:"rgba(255,255,255,0.8)",
+                borderRadius:"100px", padding:"0.25rem 0.75rem",
+                fontSize:"0.75rem", fontFamily:"Montserrat,sans-serif", fontWeight:700, cursor:"pointer",
+              }}>Logout</button>
             </div>
 
-            {/* Mobile filter chips */}
             <MobileFilterChips />
           </div>
         </div>
 
-        {renderPage()}
+        {/* Page with smooth transition animation */}
+        <PageTransition pageKey={typeof page === "object" ? `playlist-${page.id}` : page}>
+          {renderPage()}
+        </PageTransition>
       </div>
 
-      {/* Now Playing panel */}
       {currentSong && showNowPlaying && (
-        <NowPlaying
-          song={currentSong}
-          isPlaying={isPlaying}
-          likedSongs={likedSongs}
-          onToggleLike={handleToggleLike}
-          onClose={() => setShowNowPlaying(false)}
-        />
+        <NowPlaying song={currentSong} isPlaying={isPlaying} likedSongs={likedSongs}
+          onToggleLike={handleToggleLike} onClose={() => setShowNowPlaying(false)} />
       )}
 
-      {/* Music player bar */}
       <Player
-        song={currentSong}
-        songs={songs}
-        onSongChange={handleSetCurrentSong}
-        likedSongs={likedSongs}
-        onToggleLike={handleToggleLike}
-        onPlayingChange={setIsPlaying}
+        song={currentSong} songs={songs} onSongChange={handleSetCurrentSong}
+        likedSongs={likedSongs} onToggleLike={handleToggleLike} onPlayingChange={setIsPlaying}
       />
 
-      {/* Mobile bottom nav */}
-      <BottomNav
-        activePage={activePage}
-        onNavigate={setActivePage}
-        isAdmin={admin}
-      />
+      <BottomNav activePage={activePage} onNavigate={setActivePage} isAdmin={admin} />
 
     </div>
   );

@@ -1,0 +1,176 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   STUNNING.CSS
+   Add this import in App.jsx: import "./styles/Stunning.css"
+   Place this file at: src/styles/Stunning.css
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Glassmorphism cards ─────────────────────────────────────────────── */
+.card {
+  background:    rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border:        1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:    0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  transition:    transform 0.15s ease, background 0.2s, box-shadow 0.2s !important;
+  transform-style: preserve-3d;
+  will-change:   transform;
+}
+
+.card:hover {
+  background:    rgba(255, 255, 255, 0.1) !important;
+  box-shadow:    0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(29,185,84,0.2) !important;
+}
+
+/* ── Glassmorphism recent cards ──────────────────────────────────────── */
+.recent-card {
+  background:    rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border:        1px solid rgba(255, 255, 255, 0.06) !important;
+  transition:    background 0.2s, transform 0.15s !important;
+}
+.recent-card:hover {
+  background:    rgba(255, 255, 255, 0.12) !important;
+  transform:     translateY(-2px) !important;
+}
+
+/* ── Glassmorphism player bar ────────────────────────────────────────── */
+.musicplayer {
+  background:    rgba(18, 18, 18, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-top:    1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:    0 -8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Glassmorphism sidebar ───────────────────────────────────────────── */
+.nav, .library {
+  background:    rgba(18, 18, 18, 0.7) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border:        1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ── Glassmorphism sticky nav ────────────────────────────────────────── */
+.sticky-nav {
+  background:    rgba(10, 10, 10, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Glassmorphism maincontent ───────────────────────────────────────── */
+.maincontent {
+  background:    rgba(18, 18, 18, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ── 3D tilt effect on cards (JS-driven via inline style) ────────────── */
+.card-3d-wrap {
+  perspective: 800px;
+}
+
+/* ── Glowing play button ─────────────────────────────────────────────── */
+.card-play-btn {
+  box-shadow: 0 0 20px rgba(29,185,84,0.6), 0 4px 16px rgba(0,0,0,0.5) !important;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s !important;
+}
+.card-play-btn:hover {
+  box-shadow: 0 0 30px rgba(29,185,84,0.9), 0 4px 24px rgba(0,0,0,0.6) !important;
+  transform: scale(1.1) translateY(0) !important;
+}
+
+/* ── Glowing liked-songs heart ───────────────────────────────────────── */
+.like-btn.liked {
+  filter: drop-shadow(0 0 6px rgba(29,185,84,0.8));
+}
+
+/* ── Now playing panel glass ─────────────────────────────────────────── */
+.now-playing-panel {
+  background:    rgba(18, 18, 18, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border:        1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Playlist items glass ────────────────────────────────────────────── */
+.playlist-item:hover {
+  background: rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ── Bottom nav glass ────────────────────────────────────────────────── */
+.bottom-nav {
+  background:    rgba(10, 10, 10, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-top:    1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ── Upload card glass ───────────────────────────────────────────────── */
+.upload-card {
+  background:    rgba(255,255,255,0.04) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border:        1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ── Song row hover glass ────────────────────────────────────────────── */
+.song-row:hover {
+  background:    rgba(255,255,255,0.06) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* ── Scrollbar glow ──────────────────────────────────────────────────── */
+::-webkit-scrollbar-thumb {
+  background:    rgba(29,185,84,0.3) !important;
+  box-shadow:    0 0 6px rgba(29,185,84,0.3);
+}
+::-webkit-scrollbar-thumb:hover {
+  background:    rgba(29,185,84,0.5) !important;
+}
+
+/* ── Glow on active nav item ─────────────────────────────────────────── */
+.navoption.active {
+  background:    rgba(29,185,84,0.12) !important;
+  box-shadow:    inset 0 0 12px rgba(29,185,84,0.08);
+}
+
+/* ── Search box glass ────────────────────────────────────────────────── */
+.search-box {
+  background:    rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  border:        1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* ── Liked hero glass ────────────────────────────────────────────────── */
+.liked-hero {
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ── Badge glass ─────────────────────────────────────────────────────── */
+.badge {
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ── Form input glass ────────────────────────────────────────────────── */
+.form-input {
+  background:    rgba(255,255,255,0.06) !important;
+  border:        1px solid rgba(255,255,255,0.1) !important;
+  backdrop-filter: blur(8px) !important;
+}
+.form-input:focus {
+  background:    rgba(255,255,255,0.1) !important;
+  border-color:  rgba(29,185,84,0.5) !important;
+  box-shadow:    0 0 0 2px rgba(29,185,84,0.15) !important;
+}
+
+/* ── Particle canvas (lives in player bar) ───────────────────────────── */
+.player-particles {
+  position:      absolute;
+  inset:         0;
+  pointer-events:none;
+  z-index:       0;
+  border-radius: inherit;
+}
