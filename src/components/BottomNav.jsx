@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { FaHouse, FaMagnifyingGlass, FaBookOpen,  FaPlus } from "react-icons/fa6";
-import { getName, getRole, logout } from "../services/auth";
+import { getName,  logout } from "../services/auth";
 
 export default function BottomNav({ activePage, onNavigate, isAdmin }) {
   const [showProfile, setShowProfile] = useState(false);
