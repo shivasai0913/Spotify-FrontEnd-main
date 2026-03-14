@@ -1,131 +1,159 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { uploadSong } from "../services/api";
-import "../styles/App.css";
+import { toast } from "../components/Toast";
 
-const FIELDS = [
-  { name: "title", placeholder: "Song Title *", required: true },
-  { name: "artist", placeholder: "Artist Name *", required: true },
-  { name: "album", placeholder: "Album Name", required: false },
-  { name: "genre", placeholder: "Genre (Pop, Hip-Hop...)", required: false },
-  { name: "duration", placeholder: "Duration in seconds", required: false },
-  { name: "imageUrl", placeholder: "Cover Image URL", required: false },
-  { name: "audioUrl", placeholder: "MP3 Song URL (Cloudinary Link) *", required: true }
-];
-
-export default function UploadSong() {
-
+export default function UploadSong({ onUploaded }) {
   const [form, setForm] = useState({
-    title: "",
-    artist: "",
-    album: "",
-    genre: "",
-    duration: "",
-    imageUrl: "",
-    audioUrl: ""
+    title: "", artist: "", album: "", genre: "", duration: "", imageUrl: "", audioUrl: "",
   });
+  const [loading, setLoading]         = useState(false);
+  const [fetchingDur, setFetchingDur] = useState(false);
+  const audioRef = useRef(null);
 
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("");
+  const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // ── Auto-fetch duration when audioUrl is entered ──────────────────────
+  const handleAudioUrlBlur = () => {
+    const url = form.audioUrl.trim();
+    if (!url || form.duration) return;
 
-  const handleUpload = async () => {
+    setFetchingDur(true);
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous";
 
-    if (!form.title.trim() || !form.artist.trim() || !form.audioUrl.trim()) {
-      return setMsg("❌ Title, Artist and Song URL are required.");
+    audio.onloadedmetadata = () => {
+      const secs = Math.round(audio.duration);
+      if (isFinite(secs) && secs > 0) {
+        set("duration", secs);
+        toast(`Duration auto-detected: ${Math.floor(secs/60)}:${String(secs%60).padStart(2,"0")}`, "info");
+      }
+      setFetchingDur(false);
+    };
+    audio.onerror = () => {
+      // Silently fail — user can type manually
+      setFetchingDur(false);
+    };
+    audio.src = url;
+  };
+
+  const handleSubmit = async () => {
+    const { title, artist, album, genre, duration, imageUrl, audioUrl } = form;
+    if (!title || !artist || !audioUrl) {
+      toast("Title, Artist and Audio URL are required", "warning");
+      return;
     }
-
     setLoading(true);
-    setMsg("");
-
     try {
-
-      await uploadSong({
-        title: form.title,
-        artist: form.artist,
-        album: form.album,
-        genre: form.genre,
-        duration: form.duration,
-        imageUrl: form.imageUrl,
-        audioUrl: form.audioUrl
-      });
-
-      setMsg("✅ Song uploaded successfully!");
-
-      setForm({
-        title: "",
-        artist: "",
-        album: "",
-        genre: "",
-        duration: "",
-        imageUrl: "",
-        audioUrl: ""
-      });
-
-    } catch (err) {
-      setMsg("❌ Upload failed. Check backend connection.");
+      await uploadSong({ title, artist, album, genre, duration: Number(duration) || 0, imageUrl, audioUrl });
+      toast(`"${title}" uploaded successfully! 🎵`, "success");
+      setForm({ title:"", artist:"", album:"", genre:"", duration:"", imageUrl:"", audioUrl:"" });
+      onUploaded?.();
+    } catch (e) {
+      toast("Upload failed. Check backend connection.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  const fields = [
+    { key:"title",    label:"Song Title *",   placeholder:"e.g. Blinding Lights" },
+    { key:"artist",   label:"Artist *",        placeholder:"e.g. The Weeknd" },
+    { key:"album",    label:"Album",           placeholder:"e.g. After Hours" },
+    { key:"genre",    label:"Genre",           placeholder:"e.g. Pop, Hip-Hop" },
+  ];
+
   return (
     <div className="upload-page">
-
-      <h2 className="section-title" style={{ margin: "0 0 1.5rem" }}>
-        🎵 Upload New Song
+      <h2 style={{ fontSize:"1.4rem", fontWeight:900, marginBottom:"1.25rem", letterSpacing:"-0.02em" }}>
+        ⬆ Upload Song
       </h2>
 
       <div className="upload-card">
-
-        {FIELDS.map((f) => (
-          <input
-            key={f.name}
-            name={f.name}
-            placeholder={f.placeholder}
-            value={form[f.name]}
-            onChange={handleChange}
-            className="form-input"
-          />
+        {/* Basic fields */}
+        {fields.map(f => (
+          <div key={f.key}>
+            <label style={{ fontSize:"0.78rem", opacity:0.5, fontWeight:700, display:"block", marginBottom:"0.3rem", textTransform:"uppercase", letterSpacing:"0.05em" }}>
+              {f.label}
+            </label>
+            <input
+              className="form-input"
+              placeholder={f.placeholder}
+              value={form[f.key]}
+              onChange={e => set(f.key, e.target.value)}
+            />
+          </div>
         ))}
+
+        {/* Image URL */}
+        <div>
+          <label style={{ fontSize:"0.78rem", opacity:0.5, fontWeight:700, display:"block", marginBottom:"0.3rem", textTransform:"uppercase", letterSpacing:"0.05em" }}>
+            Cover Image URL
+          </label>
+          <input className="form-input" placeholder="https://..." value={form.imageUrl} onChange={e => set("imageUrl", e.target.value)} />
+          {form.imageUrl?.startsWith("http") && (
+            <img src={form.imageUrl} alt="preview"
+              onError={e => e.target.style.display="none"}
+              style={{ width:60, height:60, borderRadius:6, objectFit:"cover", marginTop:"0.5rem" }} />
+          )}
+        </div>
+
+        {/* Audio URL — with auto-duration */}
+        <div>
+          <label style={{ fontSize:"0.78rem", opacity:0.5, fontWeight:700, display:"block", marginBottom:"0.3rem", textTransform:"uppercase", letterSpacing:"0.05em" }}>
+            Audio URL *
+          </label>
+          <input
+            className="form-input"
+            placeholder="https://..."
+            value={form.audioUrl}
+            onChange={e => set("audioUrl", e.target.value)}
+            onBlur={handleAudioUrlBlur}
+          />
+          {fetchingDur && (
+            <p style={{ fontSize:"0.75rem", color:"#1DB954", marginTop:"0.3rem" }}>
+              ⏳ Detecting duration...
+            </p>
+          )}
+        </div>
+
+        {/* Duration — auto-filled or manual */}
+        <div>
+          <label style={{ fontSize:"0.78rem", opacity:0.5, fontWeight:700, display:"block", marginBottom:"0.3rem", textTransform:"uppercase", letterSpacing:"0.05em" }}>
+            Duration (seconds) {fetchingDur ? "— detecting..." : form.duration ? "✅ auto-detected" : "— paste Audio URL above to auto-fill"}
+          </label>
+          <input
+            className="form-input"
+            placeholder="e.g. 213"
+            type="number"
+            value={form.duration}
+            onChange={e => set("duration", e.target.value)}
+            style={{ borderColor: form.duration ? "#1DB95460" : undefined }}
+          />
+        </div>
 
         <button
           className="upload-btn"
-          onClick={handleUpload}
+          onClick={handleSubmit}
           disabled={loading}
         >
           {loading ? "Uploading..." : "⬆ Upload Song"}
         </button>
+      </div>
 
-        {msg && (
-          <p className={msg.startsWith("✅") ? "success-msg" : "error-msg"}>
-            {msg}
+      {/* How it works */}
+      <div style={{ marginTop:"1.5rem", background:"#181818", borderRadius:"0.75rem", padding:"1rem 1.25rem" }}>
+        <p style={{ fontSize:"0.8rem", fontWeight:700, marginBottom:"0.6rem", opacity:0.6 }}>ℹ How it works</p>
+        {[
+          "Upload your MP3 to Cloudinary or any CDN",
+          "Paste the audio URL above — duration auto-detects",
+          "Add a cover image URL (optional)",
+          "Hit Upload — song appears instantly for all users",
+        ].map((step, i) => (
+          <p key={i} style={{ fontSize:"0.78rem", opacity:0.45, marginBottom:"0.35rem" }}>
+            {i+1}. {step}
           </p>
-        )}
-
+        ))}
       </div>
-
-      <div
-        style={{
-          marginTop: "1.5rem",
-          background: "#181818",
-          borderRadius: "0.75rem",
-          padding: "1rem 1.25rem",
-          fontSize: "0.82rem",
-          opacity: 0.6,
-          lineHeight: 1.7,
-        }}
-      >
-        <p style={{ fontWeight: 700, marginBottom: "0.5rem" }}>
-          📋 How it works:
-        </p>
-        <p>1. Upload MP3 to Cloudinary</p>
-        <p>2. Copy the Cloudinary song link</p>
-        <p>3. Paste the link in "Song URL"</p>
-        <p>4. Click Upload</p>
-      </div>
-
     </div>
   );
 }
