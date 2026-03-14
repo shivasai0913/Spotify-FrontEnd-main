@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FaHouse, FaMagnifyingGlass, FaBookOpen, FaSpotify, FaPlus } from "react-icons/fa6";
+import { FaHouse, FaMagnifyingGlass, FaBookOpen,  FaPlus } from "react-icons/fa6";
 import { getName, getRole, logout } from "../services/auth";
 
 export default function BottomNav({ activePage, onNavigate, isAdmin }) {
@@ -8,7 +8,6 @@ export default function BottomNav({ activePage, onNavigate, isAdmin }) {
 
   const name  = getName() || "User";
   const email = localStorage.getItem("email") || "";
-  const role  = getRole() || "USER";
   const initial = name.charAt(0).toUpperCase();
 
   // Close popup when clicking outside
