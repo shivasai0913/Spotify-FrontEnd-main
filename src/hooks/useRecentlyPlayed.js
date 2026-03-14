@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const KEY      = "spotify_recently_played";
 const MAX_SONGS = 10;

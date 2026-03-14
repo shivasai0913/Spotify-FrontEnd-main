@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState} from "react";
 import { uploadSong } from "../services/api";
 import { toast } from "../components/Toast";
 
@@ -8,7 +8,7 @@ export default function UploadSong({ onUploaded }) {
   });
   const [loading, setLoading]         = useState(false);
   const [fetchingDur, setFetchingDur] = useState(false);
-  const audioRef = useRef(null);
+  
 
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
