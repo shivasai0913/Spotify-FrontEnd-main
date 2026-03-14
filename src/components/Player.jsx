@@ -4,7 +4,6 @@ import {
   FaRepeat, FaVolumeHigh, FaVolumeXmark, FaHeart, FaRegHeart
 } from "react-icons/fa6";
 import MobileFullPlayer from "./MobileFullPlayer";
-import SongVisualizer   from "./SongVisualizer";
 import "../styles/App.css";
 
 function formatTime(seconds) {
@@ -14,7 +13,6 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-// Track play counts in localStorage
 function incrementPlayCount(songId) {
   if (!songId) return;
   const counts = JSON.parse(localStorage.getItem("spotify_play_counts") || "{}");
@@ -31,34 +29,50 @@ export default function Player({ song, songs, onSongChange, likedSongs, onToggle
   const [shuffle, setShuffle]         = useState(false);
   const [repeat, setRepeat]           = useState(false);
   const [showFullPlayer, setShowFullPlayer] = useState(false);
-  const [showVisualizer, setShowVisualizer] = useState(true);
-  const countedRef = useRef(null); // track which song we already counted
+  const countedRef = useRef(null);
 
   const isLiked = likedSongs?.some((s) => s.id === song?.id);
 
-  const setPlay = (val) => { setPlaying(val); onPlayingChange?.(val); };
+  const setPlay = (val) => {
+    setPlaying(val);
+    onPlayingChange?.(val);
+  };
 
-useEffect(() => {
-  if (song && audioRef.current) {
-    audioRef.current.load();
-    // Resume any suspended audio context first
-    if (window.AudioContext || window.webkitAudioContext) {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      if (ctx.state === "suspended") ctx.resume();
-    }
-    audioRef.current.play().catch((err) => {
-      console.warn("Autoplay blocked:", err);
-    });
-    setPlay(true);
+  // ── Load and play when song changes ───────────────────────────────────
+  useEffect(() => {
+    if (!song || !audioRef.current) return;
+
+    const audio = audioRef.current;
+    audio.src = song.audioUrl;
+    audio.volume = volume / 100;
+    audio.load();
+
+    const timer = setTimeout(() => {
+      audio.play()
+        .then(() => setPlay(true))
+        .catch((err) => {
+          console.warn("Playback failed:", err);
+          setPlay(false);
+        });
+    }, 100);
+
     setCurrentTime(0);
-  }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [song]);
+    countedRef.current = null;
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song]);
 
   const handlePlayPause = () => {
     if (!audioRef.current) return;
-    if (playing) { audioRef.current.pause(); setPlay(false); }
-    else         { audioRef.current.play();  setPlay(true); }
+    if (playing) {
+      audioRef.current.pause();
+      setPlay(false);
+    } else {
+      audioRef.current.play()
+        .then(() => setPlay(true))
+        .catch((err) => console.warn("Play failed:", err));
+    }
   };
 
   const handleNext = () => {
@@ -72,7 +86,10 @@ useEffect(() => {
 
   const handlePrev = () => {
     if (!song || !songs.length) return;
-    if (currentTime > 3 && audioRef.current) { audioRef.current.currentTime = 0; return; }
+    if (currentTime > 3 && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      return;
+    }
     const idx  = songs.findIndex((s) => s.id === song.id);
     const prev = songs[(idx - 1 + songs.length) % songs.length];
     onSongChange(prev);
@@ -83,7 +100,6 @@ useEffect(() => {
     setCurrentTime(val);
   };
 
-  // Count play after 30 seconds of listening
   const handleTimeUpdate = () => {
     if (!audioRef.current) return;
     const t = audioRef.current.currentTime;
@@ -104,7 +120,6 @@ useEffect(() => {
     <>
       <div className="musicplayer">
 
-        {/* Album — tap on mobile to open full player */}
         <div
           className="album"
           onClick={() => { if (song && isMobile()) setShowFullPlayer(true); }}
@@ -132,82 +147,52 @@ useEffect(() => {
           )}
         </div>
 
-        {/* Player controls + visualizer */}
         <div className="player">
-          {/* Visualizer bar — click to toggle */}
-          {song && showVisualizer && (
-            <div
-              style={{ width:"100%", cursor:"pointer", marginBottom:"2px" }}
-              title="Click to hide visualizer"
-              onClick={() => setShowVisualizer(false)}
-            >
-              <SongVisualizer
-                audioEl={audioRef.current}
-                isPlaying={playing}
-                barCount={50}
-                height={36}
-                color="#1DB954"
-              />
-            </div>
-          )}
-          {song && !showVisualizer && (
-            <div className="play-bar">
-              <span className="curr-time">{formatTime(currentTime)}</span>
-              <div className="progress-wrap">
-                <input type="range" min={0} max={duration || 100} value={currentTime} step={0.1}
-                  onChange={(e) => handleSeek(Number(e.target.value))}
-                  className="progress-bar" />
-              </div>
-              <span className="tot-time">{formatTime(duration)}</span>
-            </div>
-          )}
-          {!song && (
-            <div className="play-bar">
-              <span className="curr-time">{formatTime(currentTime)}</span>
-              <div className="progress-wrap">
-                <input type="range" min={0} max={100} value={0} className="progress-bar" readOnly />
-              </div>
-              <span className="tot-time">00:00</span>
-            </div>
-          )}
-
           <div className="player-controls">
             <button className={`ctrl-btn ${shuffle ? "active" : ""}`} onClick={() => setShuffle(!shuffle)}><FaShuffle /></button>
             <button className="ctrl-btn" onClick={handlePrev}><FaBackwardStep /></button>
             <button className="play-pause-btn" onClick={handlePlayPause}>{playing ? "⏸" : "▶"}</button>
             <button className="ctrl-btn" onClick={handleNext}><FaForwardStep /></button>
             <button className={`ctrl-btn ${repeat ? "active" : ""}`} onClick={() => setRepeat(!repeat)}><FaRepeat /></button>
-            {/* Toggle visualizer button */}
-            {song && (
-              <button className="ctrl-btn" onClick={() => setShowVisualizer(v => !v)} title="Toggle visualizer"
-                style={{ fontSize:"0.8rem", opacity: showVisualizer ? 1 : 0.4 }}>
-                〰
-              </button>
-            )}
+          </div>
+          <div className="play-bar">
+            <span className="curr-time">{formatTime(currentTime)}</span>
+            <div className="progress-wrap">
+              <input type="range" min={0} max={duration || 100} value={currentTime} step={0.1}
+                onChange={(e) => handleSeek(Number(e.target.value))}
+                className="progress-bar" />
+            </div>
+            <span className="tot-time">{formatTime(duration)}</span>
           </div>
         </div>
 
-        {/* Volume */}
         <div className="controls">
           <button className="ctrl-btn" style={{ fontSize: "1rem" }}
-            onClick={() => { const v = volume === 0 ? 80 : 0; setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; }}>
+            onClick={() => {
+              const v = volume === 0 ? 80 : 0;
+              setVolume(v);
+              if (audioRef.current) audioRef.current.volume = v / 100;
+            }}>
             {volume === 0 ? <FaVolumeXmark /> : <FaVolumeHigh />}
           </button>
           <input type="range" min={0} max={100} value={volume} className="volume-bar"
-            onChange={(e) => { const v = Number(e.target.value); setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; }} />
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setVolume(v);
+              if (audioRef.current) audioRef.current.volume = v / 100;
+            }} />
         </div>
 
-        {song && (
-          <audio ref={audioRef} src={song.audioUrl}
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={() => { if (audioRef.current) setDuration(audioRef.current.duration); }}
-            onEnded={handleNext}
-            loop={repeat}
-          />
-        )}
+        {/* Single audio element — no src here, set dynamically in useEffect */}
+        <audio
+          ref={audioRef}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={() => { if (audioRef.current) setDuration(audioRef.current.duration); }}
+          onEnded={handleNext}
+          loop={repeat}
+        />
       </div>
 
-      {/* Mobile full screen player */}
       {showFullPlayer && song && (
         <MobileFullPlayer
           song={song} isPlaying={playing}
