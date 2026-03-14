@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaXmark, FaBars, FaTrash } from "react-icons/fa6";
+import { FaXmark,  FaTrash } from "react-icons/fa6";
 
 /**
  * useQueue hook — manages the song queue
