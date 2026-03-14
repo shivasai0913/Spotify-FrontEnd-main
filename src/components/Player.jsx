@@ -20,6 +20,7 @@ function incrementPlayCount(songId) {
   localStorage.setItem("spotify_play_counts", JSON.stringify(counts));
 }
 
+// ── forwardRef so App.jsx can call play/pause/next/prev via ref ──────────
 const Player = forwardRef(function Player(
   { song, songs, onSongChange, likedSongs, onToggleLike, onPlayingChange },
   ref
@@ -36,40 +37,64 @@ const Player = forwardRef(function Player(
 
   const isLiked = likedSongs?.some((s) => s.id === song?.id);
 
-  const setPlay = (val) => { setPlaying(val); onPlayingChange?.(val); };
+  const setPlay = (val) => {
+    setPlaying(val);
+    onPlayingChange?.(val);
+  };
 
+  // ── Load and play when song changes ───────────────────────────────────
   useEffect(() => {
     if (!song || !audioRef.current) return;
+
     const audio = audioRef.current;
-    audio.src    = song.audioUrl;
+    audio.src = song.audioUrl;
     audio.volume = volume / 100;
     audio.load();
+
     const timer = setTimeout(() => {
-      audio.play().then(() => setPlay(true)).catch(() => setPlay(false));
+      audio.play()
+        .then(() => setPlay(true))
+        .catch((err) => {
+          console.warn("Playback failed:", err);
+          setPlay(false);
+        });
     }, 100);
+
     setCurrentTime(0);
     countedRef.current = null;
+
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song]);
 
   const handlePlayPause = () => {
     if (!audioRef.current) return;
-    if (playing) { audioRef.current.pause(); setPlay(false); }
-    else { audioRef.current.play().then(() => setPlay(true)).catch(() => {}); }
+    if (playing) {
+      audioRef.current.pause();
+      setPlay(false);
+    } else {
+      audioRef.current.play()
+        .then(() => setPlay(true))
+        .catch((err) => console.warn("Play failed:", err));
+    }
   };
 
   const handleNext = () => {
     if (!song || !songs.length) return;
-    const idx  = songs.findIndex(s => s.id === song.id);
-    const next = shuffle ? songs[Math.floor(Math.random() * songs.length)] : songs[(idx + 1) % songs.length];
+    const idx  = songs.findIndex((s) => s.id === song.id);
+    const next = shuffle
+      ? songs[Math.floor(Math.random() * songs.length)]
+      : songs[(idx + 1) % songs.length];
     onSongChange(next);
   };
 
   const handlePrev = () => {
     if (!song || !songs.length) return;
-    if (currentTime > 3 && audioRef.current) { audioRef.current.currentTime = 0; return; }
-    const idx  = songs.findIndex(s => s.id === song.id);
+    if (currentTime > 3 && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      return;
+    }
+    const idx  = songs.findIndex((s) => s.id === song.id);
     const prev = songs[(idx - 1 + songs.length) % songs.length];
     onSongChange(prev);
   };
@@ -79,13 +104,18 @@ const Player = forwardRef(function Player(
     setCurrentTime(val);
   };
 
+  // ── New methods exposed via ref (keyboard shortcuts + sleep timer) ─────
   const handleVolumeUp   = () => { const v = Math.min(100, volume + 10); setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; };
-  const handleVolumeDown = () => { const v = Math.max(0, volume - 10);   setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; };
+  const handleVolumeDown = () => { const v = Math.max(0,   volume - 10); setVolume(v); if (audioRef.current) audioRef.current.volume = v / 100; };
   const pause            = () => { audioRef.current?.pause(); setPlay(false); };
 
-  // Expose methods to parent via ref (for keyboard shortcuts & sleep timer)
   useImperativeHandle(ref, () => ({
-    handlePlayPause, handleNext, handlePrev, handleVolumeUp, handleVolumeDown, pause,
+    handlePlayPause,
+    handleNext,
+    handlePrev,
+    handleVolumeUp,
+    handleVolumeDown,
+    pause,
   }));
 
   const handleTimeUpdate = () => {
@@ -99,14 +129,17 @@ const Player = forwardRef(function Player(
   };
 
   const imgSrc = song?.imageUrl?.startsWith("http")
-    ? song.imageUrl : "https://via.placeholder.com/56x56/282828/fff?text=♪";
+    ? song.imageUrl
+    : "https://via.placeholder.com/56x56/282828/fff?text=♪";
 
   const isMobile = () => window.innerWidth <= 700;
 
   return (
     <>
-      <div className="musicplayer" style={{ position:"relative" }}>
-        <div className="album"
+      <div className="musicplayer">
+
+        <div
+          className="album"
           onClick={() => { if (song && isMobile()) setShowFullPlayer(true); }}
           style={{ cursor: song ? "pointer" : "default" }}
         >
@@ -114,50 +147,63 @@ const Player = forwardRef(function Player(
             <>
               <div className="album-thumb">
                 <img src={imgSrc} alt={song.title}
-                  onError={e => { e.target.src="https://via.placeholder.com/56x56/282828/fff?text=♪"; }} />
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/56x56/282828/fff?text=♪"; }} />
               </div>
               <div className="album-info">
                 <p className="album-title">{song.title}</p>
                 <p className="album-artist">{song.artist}</p>
               </div>
-              <button className={`like-btn ${isLiked?"liked":""}`}
-                onClick={e => { e.stopPropagation(); onToggleLike?.(song); }}>
+              <button
+                className={`like-btn ${isLiked ? "liked" : ""}`}
+                onClick={(e) => { e.stopPropagation(); onToggleLike?.(song); }}
+              >
                 {isLiked ? <FaHeart /> : <FaRegHeart />}
               </button>
             </>
           ) : (
-            <p style={{ opacity:0.3, fontSize:"0.85rem" }}>No song selected</p>
+            <p style={{ opacity: 0.3, fontSize: "0.85rem" }}>No song selected</p>
           )}
         </div>
 
         <div className="player">
           <div className="player-controls">
-            <button className={`ctrl-btn ${shuffle?"active":""}`} onClick={() => setShuffle(!shuffle)}><FaShuffle /></button>
+            <button className={`ctrl-btn ${shuffle ? "active" : ""}`} onClick={() => setShuffle(!shuffle)}><FaShuffle /></button>
             <button className="ctrl-btn" onClick={handlePrev}><FaBackwardStep /></button>
             <button className="play-pause-btn" onClick={handlePlayPause}>{playing ? "⏸" : "▶"}</button>
             <button className="ctrl-btn" onClick={handleNext}><FaForwardStep /></button>
-            <button className={`ctrl-btn ${repeat?"active":""}`} onClick={() => setRepeat(!repeat)}><FaRepeat /></button>
+            <button className={`ctrl-btn ${repeat ? "active" : ""}`} onClick={() => setRepeat(!repeat)}><FaRepeat /></button>
           </div>
           <div className="play-bar">
             <span className="curr-time">{formatTime(currentTime)}</span>
             <div className="progress-wrap">
-              <input type="range" min={0} max={duration||100} value={currentTime} step={0.1}
-                onChange={e => handleSeek(Number(e.target.value))} className="progress-bar" />
+              <input type="range" min={0} max={duration || 100} value={currentTime} step={0.1}
+                onChange={(e) => handleSeek(Number(e.target.value))}
+                className="progress-bar" />
             </div>
             <span className="tot-time">{formatTime(duration)}</span>
           </div>
         </div>
 
         <div className="controls">
-          <button className="ctrl-btn" style={{ fontSize:"1rem" }}
-            onClick={() => { const v = volume===0?80:0; setVolume(v); if (audioRef.current) audioRef.current.volume=v/100; }}>
-            {volume===0 ? <FaVolumeXmark /> : <FaVolumeHigh />}
+          <button className="ctrl-btn" style={{ fontSize: "1rem" }}
+            onClick={() => {
+              const v = volume === 0 ? 80 : 0;
+              setVolume(v);
+              if (audioRef.current) audioRef.current.volume = v / 100;
+            }}>
+            {volume === 0 ? <FaVolumeXmark /> : <FaVolumeHigh />}
           </button>
           <input type="range" min={0} max={100} value={volume} className="volume-bar"
-            onChange={e => { const v=Number(e.target.value); setVolume(v); if (audioRef.current) audioRef.current.volume=v/100; }} />
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setVolume(v);
+              if (audioRef.current) audioRef.current.volume = v / 100;
+            }} />
         </div>
 
-        <audio ref={audioRef}
+        {/* Single audio element — no src here, set dynamically in useEffect */}
+        <audio
+          ref={audioRef}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={() => { if (audioRef.current) setDuration(audioRef.current.duration); }}
           onEnded={handleNext}
