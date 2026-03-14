@@ -158,9 +158,9 @@ export default function LoginPage({ onLoginSuccess }) {
               <input style={{ ...s.input, borderColor: "#1DB95450" }}
                 type="password" placeholder="Enter secret key"
                 value={adminSecret} onChange={e => setAdminSecret(e.target.value)} onKeyDown={handleKey} />
-              <p style={{ fontSize:"0.72rem", opacity:0.5, marginTop:"0.3rem" }}>
-                Secret key: <code style={{ color:"#1DB954", userSelect:"all" }}>SPOTIFY_ADMIN_SECRET_2024</code>
-              </p>
+              {/* <p style={{ fontSize:"0.72rem", opacity:0.5, marginTop:"0.3rem" }}>
+                Secret key: <code style={{ color:"#1DB954", userSelect:"all" }}></code>
+              </p> */}
             </div>
           )}
 
